@@ -1,0 +1,17 @@
+{
+	"name": "GithubDemo",
+	"properties": {
+		"activities": [
+			{
+				"name": "GithubWait",
+				"type": "Wait",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"waitTimeInSeconds": 2
+				}
+			}
+		],
+		"annotations": []
+	}
+}
