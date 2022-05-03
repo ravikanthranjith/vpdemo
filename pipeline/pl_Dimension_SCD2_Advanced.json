@@ -1,0 +1,34 @@
+{
+	"name": "pl_Dimension_SCD2_Advanced",
+	"properties": {
+		"activities": [
+			{
+				"name": "df_SCD2_Dimension",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "1.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "df_SCD2_Dimension",
+						"type": "DataFlowReference"
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2022-04-27T02:56:16Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

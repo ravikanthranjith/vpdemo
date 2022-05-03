@@ -1,0 +1,176 @@
+{
+	"name": "df_SCD2_Dimension",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "SourceOfDimension",
+						"type": "DatasetReference"
+					},
+					"name": "SourceOfDimension"
+				},
+				{
+					"dataset": {
+						"referenceName": "EmployeeDimension",
+						"type": "DatasetReference"
+					},
+					"name": "EmpDIMTable"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "EmployeeDimension",
+						"type": "DatasetReference"
+					},
+					"name": "TargetDimension"
+				},
+				{
+					"dataset": {
+						"referenceName": "EmployeeDimension",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "SELECTWithIsActive"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "lookup1"
+				},
+				{
+					"name": "ExistingRecords"
+				},
+				{
+					"name": "SelectExisting"
+				},
+				{
+					"name": "derivedColumnWithISActive"
+				},
+				{
+					"name": "alterRow1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          EmpID as integer,",
+				"          EMPLOYEENAME as string,",
+				"          EMPLOYEEGENDER as string,",
+				"          EMPLOYEEDEPT as string,",
+				"          EMPLOYEECITY as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> SourceOfDimension",
+				"source(output(",
+				"          EMPLOYEEKEY as integer,",
+				"          EmpID as integer,",
+				"          EMPLOYEENAME as string,",
+				"          EMPLOYEEGENDER as string,",
+				"          EMPLOYEEDEPT as string,",
+				"          EMPLOYEECITY as string,",
+				"          IsActive as boolean",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> EmpDIMTable",
+				"SourceOfDimension derive(IsActive = 1) ~> SELECTWithIsActive",
+				"EmpDIMTable select(mapColumn(",
+				"          Existing_EMPLOYEEKEY = EMPLOYEEKEY,",
+				"          Existing_EmpID = EmpID,",
+				"          Existing_EMPLOYEENAME = EMPLOYEENAME,",
+				"          Existing_EMPLOYEEGENDER = EMPLOYEEGENDER,",
+				"          Existing_EMPLOYEEDEPT = EMPLOYEEDEPT,",
+				"          Existing_EMPLOYEECITY = EMPLOYEECITY,",
+				"          Existing_IsActive = IsActive",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"SourceOfDimension, select1 lookup(EmpID == Existing_EmpID,",
+				"     multiple: true,",
+				"     broadcast: 'auto')~> lookup1",
+				"lookup1 filter(!isNull(Existing_EmpID)) ~> ExistingRecords",
+				"ExistingRecords select(mapColumn(",
+				"          Existing_EMPLOYEEKEY,",
+				"          Existing_EmpID,",
+				"          Existing_EMPLOYEENAME,",
+				"          Existing_EMPLOYEEGENDER,",
+				"          Existing_EMPLOYEEDEPT,",
+				"          Existing_EMPLOYEECITY,",
+				"          Existing_IsActive",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> SelectExisting",
+				"SelectExisting derive(Existing_IsActive = 0) ~> derivedColumnWithISActive",
+				"derivedColumnWithISActive alterRow(updateIf(true())) ~> alterRow1",
+				"SELECTWithIsActive sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          EMPLOYEEKEY as integer,",
+				"          EmpID as integer,",
+				"          EMPLOYEENAME as string,",
+				"          EMPLOYEEGENDER as string,",
+				"          EMPLOYEEDEPT as string,",
+				"          EMPLOYEECITY as string,",
+				"          IsActive as boolean",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     saveOrder: 2,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          EmpID,",
+				"          EMPLOYEENAME,",
+				"          EMPLOYEEGENDER,",
+				"          EMPLOYEEDEPT,",
+				"          EMPLOYEECITY,",
+				"          IsActive",
+				"     )) ~> TargetDimension",
+				"alterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          EMPLOYEEKEY as integer,",
+				"          EmpID as integer,",
+				"          EMPLOYEENAME as string,",
+				"          EMPLOYEEGENDER as string,",
+				"          EMPLOYEEDEPT as string,",
+				"          EMPLOYEECITY as string,",
+				"          IsActive as boolean",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:false,",
+				"     updateable:true,",
+				"     upsertable:false,",
+				"     keys:['EMPLOYEEKEY'],",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     saveOrder: 1,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          EMPLOYEEKEY = Existing_EMPLOYEEKEY,",
+				"          EmpID = Existing_EmpID,",
+				"          EMPLOYEENAME = Existing_EMPLOYEENAME,",
+				"          EMPLOYEEGENDER = Existing_EMPLOYEEGENDER,",
+				"          EMPLOYEEDEPT = Existing_EMPLOYEEDEPT,",
+				"          EMPLOYEECITY = Existing_EMPLOYEECITY,",
+				"          IsActive = Existing_IsActive",
+				"     )) ~> sink1"
+			]
+		}
+	}
+}

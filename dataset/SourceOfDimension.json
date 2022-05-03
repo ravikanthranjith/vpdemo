@@ -1,0 +1,39 @@
+{
+	"name": "SourceOfDimension",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabase1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "EmpID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "EMPLOYEENAME",
+				"type": "varchar"
+			},
+			{
+				"name": "EMPLOYEEGENDER",
+				"type": "varchar"
+			},
+			{
+				"name": "EMPLOYEEDEPT",
+				"type": "varchar"
+			},
+			{
+				"name": "EMPLOYEECITY",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "SourceOfEmpDimension"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

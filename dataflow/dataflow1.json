@@ -1,0 +1,130 @@
+{
+	"name": "dataflow1",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "SourceOfDimension",
+						"type": "DatasetReference"
+					},
+					"name": "SourceOfDimension"
+				},
+				{
+					"dataset": {
+						"referenceName": "EmployeeDimension",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "EmployeeDimension",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "lookup1"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "filter1"
+				},
+				{
+					"name": "select2"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          EmpID as integer,",
+				"          EMPLOYEENAME as string,",
+				"          EMPLOYEEGENDER as string,",
+				"          EMPLOYEEDEPT as string,",
+				"          EMPLOYEECITY as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> SourceOfDimension",
+				"source(output(",
+				"          EMPLOYEEKEY as integer,",
+				"          EmpID as integer,",
+				"          EMPLOYEENAME as string,",
+				"          EMPLOYEEGENDER as string,",
+				"          EMPLOYEEDEPT as string,",
+				"          EMPLOYEECITY as string,",
+				"          IsActive as boolean",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> source1",
+				"SourceOfDimension derive(IsActive = 1) ~> derivedColumn1",
+				"SourceOfDimension, select1 lookup(EmpID == {EXISTING-EmpID},",
+				"     multiple: true,",
+				"     broadcast: 'auto')~> lookup1",
+				"source1 select(mapColumn(",
+				"          {EXISTING-EMPLOYEEKEY} = EMPLOYEEKEY,",
+				"          {EXISTING-EmpID} = EmpID,",
+				"          {EXISTING-EMPLOYEENAME} = EMPLOYEENAME,",
+				"          {EXISTING-EMPLOYEEGENDER} = EMPLOYEEGENDER,",
+				"          {EXISTING-EMPLOYEEDEPT} = EMPLOYEEDEPT,",
+				"          {EXISTING-EMPLOYEECITY} = EMPLOYEECITY,",
+				"          {EXISTING-IsActive} = IsActive",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"lookup1 filter(!isNull({EXISTING-EmpID})) ~> filter1",
+				"filter1 select(mapColumn(",
+				"          {EXISTING-EMPLOYEEKEY},",
+				"          {EXISTING-EmpID},",
+				"          {EXISTING-EMPLOYEENAME},",
+				"          {EXISTING-EMPLOYEEGENDER},",
+				"          {EXISTING-EMPLOYEEDEPT},",
+				"          {EXISTING-EMPLOYEECITY},",
+				"          {EXISTING-IsActive}",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select2",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          EMPLOYEEKEY as integer,",
+				"          EmpID as integer,",
+				"          EMPLOYEENAME as string,",
+				"          EMPLOYEEGENDER as string,",
+				"          EMPLOYEEDEPT as string,",
+				"          EMPLOYEECITY as string,",
+				"          IsActive as boolean",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          EmpID,",
+				"          EMPLOYEENAME,",
+				"          EMPLOYEEGENDER,",
+				"          EMPLOYEEDEPT,",
+				"          EMPLOYEECITY,",
+				"          IsActive",
+				"     )) ~> sink1"
+			]
+		}
+	}
+}

@@ -1,0 +1,9 @@
+{
+	"name": "visualpathdemo",
+	"location": "eastus2",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "c7f461f5-4e8a-4cb8-927f-38d8537d8644",
+		"tenantId": "b2ef953e-b5c8-4ece-bfe7-6b5e378f5241"
+	}
+}

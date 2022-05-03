@@ -1,0 +1,25 @@
+{
+	"name": "DailyNightly",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "pl_IncrementalCopy",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Minute",
+				"interval": 10,
+				"startTime": "2022-04-22T01:09:00",
+				"endTime": "2022-04-23T01:26:43",
+				"timeZone": "India Standard Time"
+			}
+		}
+	}
+}
