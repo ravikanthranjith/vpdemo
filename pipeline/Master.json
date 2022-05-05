@@ -1,0 +1,41 @@
+{
+	"name": "Master",
+	"properties": {
+		"activities": [
+			{
+				"name": "MasterExecutorDimension",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "MasterDimensionLoad",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "MasterExecutorFacts",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "MasterExecutorDimension",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "MasterFactLoad",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"annotations": []
+	}
+}
