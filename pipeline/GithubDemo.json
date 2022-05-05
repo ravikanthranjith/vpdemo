@@ -70,12 +70,6 @@
 				"defaultValue": "Australia"
 			}
 		},
-		"variables": {
-			"FileName": {
-				"type": "String",
-				"defaultValue": "ItemName"
-			}
-		},
 		"annotations": []
 	}
 }
