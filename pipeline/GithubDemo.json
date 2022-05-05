@@ -3,8 +3,8 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Get Metadata1",
-				"type": "GetMetadata",
+				"name": "Copy data1",
+				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "7.00:00:00",
@@ -15,23 +15,67 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"dataset": {
-						"referenceName": "DelimitedText1",
-						"type": "DatasetReference"
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "@select * from dimgeography where\nStateProvinceName=pipeline().parameters.StateProvinceName\nand EnglishCountryRegionName=pipeline().parameters.EnglishCountryRegionName",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
 					},
-					"fieldList": [
-						"itemName"
-					],
-					"storeSettings": {
-						"type": "AzureBlobStorageReadSettings",
-						"enablePartitionDiscovery": false
+					"sink": {
+						"type": "AzureSqlSink",
+						"writeBehavior": "upsert",
+						"upsertSettings": {
+							"useTempDB": true,
+							"keys": [
+								"GeographyKey"
+							]
+						},
+						"sqlWriterUseTableLock": false,
+						"disableMetricsCollection": false
 					},
-					"formatSettings": {
-						"type": "DelimitedTextReadSettings"
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
 					}
-				}
+				},
+				"inputs": [
+					{
+						"referenceName": "AzureSqlTable2",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "AzureSqlTable3",
+						"type": "DatasetReference"
+					}
+				]
 			}
 		],
+		"parameters": {
+			"StateProvinceName": {
+				"type": "string",
+				"defaultValue": "New South Wales"
+			},
+			"EnglishCountryRegionName": {
+				"type": "string",
+				"defaultValue": "Australia"
+			}
+		},
+		"variables": {
+			"FileName": {
+				"type": "String",
+				"defaultValue": "ItemName"
+			}
+		},
 		"annotations": []
 	}
 }
