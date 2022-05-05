@@ -18,7 +18,7 @@
 					"source": {
 						"type": "AzureSqlSource",
 						"sqlReaderQuery": {
-							"value": "@select * from dimgeography where\nStateProvinceName=pipeline().parameters.StateProvinceName\nand EnglishCountryRegionName=pipeline().parameters.EnglishCountryRegionName",
+							"value": "@concat('select * from dimgeography where\nStateProvinceName=',pipeline().parameters.StateProvinceName) \n",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00",
@@ -64,10 +64,6 @@
 			"StateProvinceName": {
 				"type": "string",
 				"defaultValue": "New South Wales"
-			},
-			"EnglishCountryRegionName": {
-				"type": "string",
-				"defaultValue": "Australia"
 			}
 		},
 		"annotations": []
