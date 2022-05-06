@@ -1,0 +1,39 @@
+{
+	"name": "InterationEmpOutput",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabase1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "EmpID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "EmpName",
+				"type": "varchar"
+			},
+			{
+				"name": "EmpDepartment",
+				"type": "varchar"
+			},
+			{
+				"name": "EmpSalary",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "EmpLocation",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "EmployeeDataOutput"
+		}
+	}
+}
