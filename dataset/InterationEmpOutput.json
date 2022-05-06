@@ -5,35 +5,20 @@
 			"referenceName": "AzureSqlDatabase1",
 			"type": "LinkedServiceReference"
 		},
+		"parameters": {
+			"TableName": {
+				"type": "string"
+			}
+		},
 		"annotations": [],
 		"type": "AzureSqlTable",
-		"schema": [
-			{
-				"name": "EmpID",
-				"type": "int",
-				"precision": 10
-			},
-			{
-				"name": "EmpName",
-				"type": "varchar"
-			},
-			{
-				"name": "EmpDepartment",
-				"type": "varchar"
-			},
-			{
-				"name": "EmpSalary",
-				"type": "int",
-				"precision": 10
-			},
-			{
-				"name": "EmpLocation",
-				"type": "varchar"
-			}
-		],
+		"schema": [],
 		"typeProperties": {
 			"schema": "dbo",
-			"table": "EmployeeDataOutput"
+			"table": {
+				"value": "@dataset().TableName",
+				"type": "Expression"
+			}
 		}
 	}
 }
