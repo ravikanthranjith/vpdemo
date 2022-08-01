@@ -1,6 +1,5 @@
 {
 	"name": "KVVPDemo",
-	"type": "Microsoft.DataFactory/factories/linkedservices",
 	"properties": {
 		"annotations": [],
 		"type": "AzureSqlDatabase",
@@ -12,8 +11,10 @@
 					"referenceName": "KVLinkedService",
 					"type": "LinkedServiceReference"
 				},
-				"secretName": "PasswordforSQLDb"
+				"secretName": "PasswordforSQLDb",
+				"secretVersion": "740c107c2fce4c63baa0c109cfed9a1b"
 			}
 		}
-	}
+	},
+	"type": "Microsoft.DataFactory/factories/linkedservices"
 }
