@@ -11,9 +11,17 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage1'"
 		},
+		"AzureDatawarehouse_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureDatawarehouse'"
+		},
 		"AzureSqlDatabase1_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AzureSqlDatabase1'"
+		},
+		"EmpRepo_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'EmpRepo'"
 		},
 		"KVVPDemo_connectionString": {
 			"type": "secureString",
@@ -53,11 +61,14 @@
 					"AzureBlobStorage1_connectionString": {
 						"value": "[parameters('AzureBlobStorage1_connectionString')]"
 					},
+					"AzureDatawarehouse_connectionString": {
+						"value": "[parameters('AzureDatawarehouse_connectionString')]"
+					},
 					"AzureSqlDatabase1_connectionString": {
 						"value": "[parameters('AzureSqlDatabase1_connectionString')]"
 					},
-					"KVVPDemo_connectionString": {
-						"value": "[parameters('KVVPDemo_connectionString')]"
+					"EmpRepo_connectionString": {
+						"value": "[parameters('EmpRepo_connectionString')]"
 					},
 					"KVLinkedService_properties_typeProperties_baseUrl": {
 						"value": "[parameters('KVLinkedService_properties_typeProperties_baseUrl')]"
@@ -79,6 +90,9 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"KVVPDemo_connectionString": {
+						"value": "[parameters('KVVPDemo_connectionString')]"
 					}
 				}
 			},
