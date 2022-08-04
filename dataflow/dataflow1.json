@@ -17,6 +17,13 @@
 						"type": "DatasetReference"
 					},
 					"name": "source1"
+				},
+				{
+					"dataset": {
+						"referenceName": "SourceOfDimension",
+						"type": "DatasetReference"
+					},
+					"name": "source2"
 				}
 			],
 			"sinks": [
@@ -43,6 +50,15 @@
 				},
 				{
 					"name": "select2"
+				},
+				{
+					"name": "select3"
+				},
+				{
+					"name": "surrogateKey1"
+				},
+				{
+					"name": "filter2"
 				}
 			],
 			"scriptLines": [
@@ -70,6 +86,17 @@
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
 				"     format: 'table') ~> source1",
+				"source(output(",
+				"          EmpID as integer,",
+				"          EMPLOYEENAME as string,",
+				"          EMPLOYEEGENDER as string,",
+				"          EMPLOYEEDEPT as string,",
+				"          EMPLOYEECITY as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> source2",
 				"SourceOfDimension derive(IsActive = 1) ~> derivedColumn1",
 				"SourceOfDimension, select1 lookup(EmpID == {EXISTING-EmpID},",
 				"     multiple: true,",
@@ -97,6 +124,18 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select2",
+				"source2 select(mapColumn(",
+				"          EmpID,",
+				"          EMPLOYEENAME,",
+				"          EMPLOYEEGENDER,",
+				"          EMPLOYEEDEPT",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select3",
+				"select3 keyGenerate(output(EmployeeKey as long),",
+				"     startAt: 20001L,",
+				"     stepValue: 1L) ~> surrogateKey1",
+				"surrogateKey1 filter(ERROR_FUNCTION('')) ~> filter2",
 				"derivedColumn1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
