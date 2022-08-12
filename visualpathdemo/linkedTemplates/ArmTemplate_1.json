@@ -17,6 +17,47 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/SourceOfDimension')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "EmpID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "EMPLOYEENAME",
+						"type": "varchar"
+					},
+					{
+						"name": "EMPLOYEEGENDER",
+						"type": "varchar"
+					},
+					{
+						"name": "EMPLOYEEDEPT",
+						"type": "varchar"
+					},
+					{
+						"name": "EMPLOYEECITY",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "SourceOfEmpDimension"
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/SourceTable')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -1198,6 +1239,29 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/EmPloyeeDimension')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "WranglingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"name": "EmployeeDimension",
+							"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> EmployeeDimension",
+							"dataset": {
+								"referenceName": "EmployeeDimension",
+								"type": "DatasetReference"
+							}
+						}
+					],
+					"script": "section Section1;\r\nshared EmployeeDimension = let AdfDoc = Sql.Database(\"ravidatacloud.database.windows.net\", \"ravidatacloud\", [CreateNavigationProperties = false]), InputTable = AdfDoc{[Schema=\"dbo\",Item=\"DIMEmployee\"]}[Data] in InputTable;\r\nshared UserQuery = let Source = #\"EmployeeDimension\",\r\n  #\"Filtered rows\" = Table.SelectRows(Source, each [IsActive] = true),\r\n  #\"Removed columns\" = Table.RemoveColumns(#\"Filtered rows\", {\"EMPLOYEEKEY\", \"EMPLOYEECITY\", \"IsActive\"}) in #\"Removed columns\";\r\n",
+					"documentLocale": "en-us"
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/dataflow1')]",
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
@@ -1363,7 +1427,9 @@
 					]
 				}
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/SourceOfDimension')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/dataflow2')]",
@@ -1534,7 +1600,9 @@
 					]
 				}
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/SourceOfDimension')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/df_SCD2_Dimension')]",
@@ -1713,7 +1781,9 @@
 					]
 				}
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/SourceOfDimension')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/df_SCD2_Dimension_Advanced')]",
@@ -1892,7 +1962,9 @@
 					]
 				}
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/SourceOfDimension')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/powerquery1')]",
@@ -1963,106 +2035,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/dataflows/DimensionDataFlow')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/pl_Dimension_SCD2')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "df_SCD2_Dimension",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "1.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "df_SCD2_Dimension",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"SourceOfDimension": {},
-									"EmpDIMTable": {},
-									"TargetDimension": {},
-									"sink1": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"annotations": [],
-				"lastPublishTime": "2022-04-30T23:07:50Z"
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/df_SCD2_Dimension')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/pl_Dimension_SCD2_Advanced')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "df_SCD2_Dimension",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "1.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "df_SCD2_Dimension",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"SourceOfDimension": {},
-									"EmpDIMTable": {},
-									"TargetDimension": {},
-									"sink1": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"annotations": [],
-				"lastPublishTime": "2022-04-27T02:56:16Z"
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/df_SCD2_Dimension')]"
 			]
 		}
 	]

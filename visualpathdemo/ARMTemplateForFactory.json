@@ -2074,6 +2074,31 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/EmPloyeeDimension')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "WranglingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"name": "EmployeeDimension",
+							"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> EmployeeDimension",
+							"dataset": {
+								"referenceName": "EmployeeDimension",
+								"type": "DatasetReference"
+							}
+						}
+					],
+					"script": "section Section1;\r\nshared EmployeeDimension = let AdfDoc = Sql.Database(\"ravidatacloud.database.windows.net\", \"ravidatacloud\", [CreateNavigationProperties = false]), InputTable = AdfDoc{[Schema=\"dbo\",Item=\"DIMEmployee\"]}[Data] in InputTable;\r\nshared UserQuery = let Source = #\"EmployeeDimension\",\r\n  #\"Filtered rows\" = Table.SelectRows(Source, each [IsActive] = true),\r\n  #\"Removed columns\" = Table.RemoveColumns(#\"Filtered rows\", {\"EMPLOYEEKEY\", \"EMPLOYEECITY\", \"IsActive\"}) in #\"Removed columns\";\r\n",
+					"documentLocale": "en-us"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/EmployeeDimension')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/dataflow1')]",
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
@@ -2806,6 +2831,19 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/EmployeeDimension')]"
 			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pipeline1')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": []
 		}
 	]
 }
