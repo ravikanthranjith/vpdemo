@@ -56,9 +56,6 @@
 				},
 				{
 					"name": "surrogateKey1"
-				},
-				{
-					"name": "filter2"
 				}
 			],
 			"scriptLines": [
@@ -135,7 +132,6 @@
 				"select3 keyGenerate(output(EmployeeKey as long),",
 				"     startAt: 20001L,",
 				"     stepValue: 1L) ~> surrogateKey1",
-				"surrogateKey1 filter(ERROR_FUNCTION('')) ~> filter2",
 				"derivedColumn1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
