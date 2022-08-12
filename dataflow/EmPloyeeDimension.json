@@ -1,0 +1,20 @@
+{
+	"name": "EmPloyeeDimension",
+	"properties": {
+		"type": "WranglingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"name": "EmployeeDimension",
+					"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~>  EmployeeDimension",
+					"dataset": {
+						"referenceName": "EmployeeDimension",
+						"type": "DatasetReference"
+					}
+				}
+			],
+			"script": "section Section1;\r\nshared EmployeeDimension = let AdfDoc = Sql.Database(\"ravidatacloud.database.windows.net\", \"ravidatacloud\", [CreateNavigationProperties = false]), InputTable = AdfDoc{[Schema=\"dbo\",Item=\"DIMEmployee\"]}[Data] in InputTable;\r\nshared UserQuery = let Source = #\"EmployeeDimension\",\r\n  #\"Filtered rows\" = Table.SelectRows(Source, each [IsActive] = true),\r\n  #\"Removed columns\" = Table.RemoveColumns(#\"Filtered rows\", {\"EMPLOYEEKEY\", \"EMPLOYEECITY\", \"IsActive\"}) in #\"Removed columns\";\r\n",
+			"documentLocale": "en-us"
+		}
+	}
+}
