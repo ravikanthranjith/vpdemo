@@ -2094,6 +2094,13 @@
 								"type": "DatasetReference"
 							},
 							"name": "source1"
+						},
+						{
+							"dataset": {
+								"referenceName": "SourceOfDimension",
+								"type": "DatasetReference"
+							},
+							"name": "source2"
 						}
 					],
 					"sinks": [
@@ -2120,6 +2127,12 @@
 						},
 						{
 							"name": "select2"
+						},
+						{
+							"name": "select3"
+						},
+						{
+							"name": "surrogateKey1"
 						}
 					],
 					"scriptLines": [
@@ -2147,6 +2160,17 @@
 						"     validateSchema: false,",
 						"     isolationLevel: 'READ_UNCOMMITTED',",
 						"     format: 'table') ~> source1",
+						"source(output(",
+						"          EmpID as integer,",
+						"          EMPLOYEENAME as string,",
+						"          EMPLOYEEGENDER as string,",
+						"          EMPLOYEEDEPT as string,",
+						"          EMPLOYEECITY as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> source2",
 						"SourceOfDimension derive(IsActive = 1) ~> derivedColumn1",
 						"SourceOfDimension, select1 lookup(EmpID == {EXISTING-EmpID},",
 						"     multiple: true,",
@@ -2174,6 +2198,17 @@
 						"     ),",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true) ~> select2",
+						"source2 select(mapColumn(",
+						"          EmpID,",
+						"          EMPLOYEENAME,",
+						"          EMPLOYEEGENDER,",
+						"          EMPLOYEEDEPT",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select3",
+						"select3 keyGenerate(output(EmployeeKey as long),",
+						"     startAt: 20001L,",
+						"     stepValue: 1L) ~> surrogateKey1",
 						"derivedColumn1 sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     input(",
@@ -2517,7 +2552,7 @@
 						"     format: 'table',",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true,",
-						"     saveOrder: 2,",
+						"     saveOrder: 0,",
 						"     errorHandlingOption: 'stopOnFirstError',",
 						"     mapColumn(",
 						"          EmpID,",
@@ -2546,7 +2581,7 @@
 						"     format: 'table',",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true,",
-						"     saveOrder: 1,",
+						"     saveOrder: 0,",
 						"     errorHandlingOption: 'stopOnFirstError',",
 						"     mapColumn(",
 						"          EMPLOYEEKEY = Existing_EMPLOYEEKEY,",
@@ -2744,6 +2779,31 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/SourceOfDimension')]",
+				"[concat(variables('factoryId'), '/datasets/EmployeeDimension')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/powerquery1')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "WranglingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"name": "EmployeeDimension",
+							"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> EmployeeDimension",
+							"dataset": {
+								"referenceName": "EmployeeDimension",
+								"type": "DatasetReference"
+							}
+						}
+					],
+					"script": "section Section1;\r\nshared EmployeeDimension = let AdfDoc = Sql.Database(\"ravidatacloud.database.windows.net\", \"ravidatacloud\", [CreateNavigationProperties = false]), InputTable = AdfDoc{[Schema=\"dbo\",Item=\"DIMEmployee\"]}[Data] in InputTable;\r\nshared UserQuery = let Source = #\"EmployeeDimension\",\r\n  #\"Filtered rows\" = Table.SelectRows(Source, each [IsActive] = true) in #\"Filtered rows\";\r\n",
+					"documentLocale": "en-us"
+				}
+			},
+			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/EmployeeDimension')]"
 			]
 		}
