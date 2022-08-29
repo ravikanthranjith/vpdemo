@@ -1,0 +1,22 @@
+{
+	"name": "dtTarget",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "adlsTarget",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "visualpathdirectory/2022/02",
+				"fileSystem": "visualpath"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}

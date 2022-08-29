@@ -1,0 +1,30 @@
+{
+	"name": "dsASQL",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ASQL",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "AppID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "AppName",
+				"type": "varchar"
+			},
+			{
+				"name": "AppShortName",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "APPLICATIONS"
+		}
+	}
+}
