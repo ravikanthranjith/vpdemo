@@ -27,9 +27,21 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'KVVPDemo'"
 		},
+		"LS_ASQL_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'LS_ASQL'"
+		},
+		"adlsTarget_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'adlsTarget'"
+		},
 		"KVLinkedService_properties_typeProperties_baseUrl": {
 			"type": "string",
 			"defaultValue": "https://KVDemo-VP.vault.azure.net/"
+		},
+		"adlsTarget_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://visualpathdemo.dfs.core.windows.net/"
 		},
 		"containerUri": {
 			"type": "string",
@@ -70,8 +82,17 @@
 					"EmpRepo_connectionString": {
 						"value": "[parameters('EmpRepo_connectionString')]"
 					},
+					"LS_ASQL_connectionString": {
+						"value": "[parameters('LS_ASQL_connectionString')]"
+					},
+					"adlsTarget_accountKey": {
+						"value": "[parameters('adlsTarget_accountKey')]"
+					},
 					"KVLinkedService_properties_typeProperties_baseUrl": {
 						"value": "[parameters('KVLinkedService_properties_typeProperties_baseUrl')]"
+					},
+					"adlsTarget_properties_typeProperties_url": {
+						"value": "[parameters('adlsTarget_properties_typeProperties_url')]"
 					}
 				}
 			},

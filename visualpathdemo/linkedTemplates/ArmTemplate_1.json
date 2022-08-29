@@ -17,6 +17,82 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/SourceDataset')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "PersonID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Name",
+						"type": "varchar"
+					},
+					{
+						"name": "LastModifytime",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "data_source_table"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SourceOfDimension')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "EmpID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "EMPLOYEENAME",
+						"type": "varchar"
+					},
+					{
+						"name": "EMPLOYEEGENDER",
+						"type": "varchar"
+					},
+					{
+						"name": "EMPLOYEEDEPT",
+						"type": "varchar"
+					},
+					{
+						"name": "EMPLOYEECITY",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "SourceOfEmpDimension"
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/SourceTable')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -355,6 +431,64 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/dsASQL')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ASQL",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "AppID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "AppName",
+						"type": "varchar"
+					},
+					{
+						"name": "AppShortName",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "APPLICATIONS"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/dtTarget')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "adlsTarget",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "visualpathdirectory/2022/02",
+						"fileSystem": "visualpath"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/GithubDemo')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -669,7 +803,8 @@
 				"lastPublishTime": "2022-04-21T01:53:18Z"
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/WatermarkDataset')]"
+				"[concat(variables('factoryId'), '/datasets/WatermarkDataset')]",
+				"[concat(variables('factoryId'), '/datasets/SourceDataset')]"
 			]
 		},
 		{
@@ -1386,7 +1521,9 @@
 					]
 				}
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/SourceOfDimension')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/dataflow2')]",
@@ -1557,7 +1694,9 @@
 					]
 				}
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/SourceOfDimension')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/df_SCD2_Dimension')]",
@@ -1736,317 +1875,8 @@
 					]
 				}
 			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/df_SCD2_Dimension_Advanced')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "SourceOfDimension",
-								"type": "DatasetReference"
-							},
-							"name": "SourceOfDimension"
-						},
-						{
-							"dataset": {
-								"referenceName": "EmployeeDimension",
-								"type": "DatasetReference"
-							},
-							"name": "EmpDIMTable"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "EmployeeDimension",
-								"type": "DatasetReference"
-							},
-							"name": "TargetDimension"
-						},
-						{
-							"dataset": {
-								"referenceName": "EmployeeDimension",
-								"type": "DatasetReference"
-							},
-							"name": "sink1"
-						}
-					],
-					"transformations": [
-						{
-							"name": "SELECTWithIsActive"
-						},
-						{
-							"name": "select1"
-						},
-						{
-							"name": "lookup1"
-						},
-						{
-							"name": "ExistingRecords"
-						},
-						{
-							"name": "SelectExisting"
-						},
-						{
-							"name": "derivedColumnWithISActive"
-						},
-						{
-							"name": "alterRow1"
-						}
-					],
-					"scriptLines": [
-						"source(output(",
-						"          EmpID as integer,",
-						"          EMPLOYEENAME as string,",
-						"          EMPLOYEEGENDER as string,",
-						"          EMPLOYEEDEPT as string,",
-						"          EMPLOYEECITY as string",
-						"     ),",
-						"     allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     isolationLevel: 'READ_UNCOMMITTED',",
-						"     format: 'table') ~> SourceOfDimension",
-						"source(output(",
-						"          EMPLOYEEKEY as integer,",
-						"          EmpID as integer,",
-						"          EMPLOYEENAME as string,",
-						"          EMPLOYEEGENDER as string,",
-						"          EMPLOYEEDEPT as string,",
-						"          EMPLOYEECITY as string,",
-						"          IsActive as boolean",
-						"     ),",
-						"     allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     isolationLevel: 'READ_UNCOMMITTED',",
-						"     format: 'table') ~> EmpDIMTable",
-						"SourceOfDimension derive(IsActive = 1) ~> SELECTWithIsActive",
-						"EmpDIMTable select(mapColumn(",
-						"          Existing_EMPLOYEEKEY = EMPLOYEEKEY,",
-						"          Existing_EmpID = EmpID,",
-						"          Existing_EMPLOYEENAME = EMPLOYEENAME,",
-						"          Existing_EMPLOYEEGENDER = EMPLOYEEGENDER,",
-						"          Existing_EMPLOYEEDEPT = EMPLOYEEDEPT,",
-						"          Existing_EMPLOYEECITY = EMPLOYEECITY,",
-						"          Existing_IsActive = IsActive",
-						"     ),",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true) ~> select1",
-						"SourceOfDimension, select1 lookup(EmpID == Existing_EmpID,",
-						"     multiple: true,",
-						"     broadcast: 'auto')~> lookup1",
-						"lookup1 filter(!isNull(Existing_EmpID)) ~> ExistingRecords",
-						"ExistingRecords select(mapColumn(",
-						"          Existing_EMPLOYEEKEY,",
-						"          Existing_EmpID,",
-						"          Existing_EMPLOYEENAME,",
-						"          Existing_EMPLOYEEGENDER,",
-						"          Existing_EMPLOYEEDEPT,",
-						"          Existing_EMPLOYEECITY,",
-						"          Existing_IsActive",
-						"     ),",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true) ~> SelectExisting",
-						"SelectExisting derive(Existing_IsActive = 0) ~> derivedColumnWithISActive",
-						"derivedColumnWithISActive alterRow(updateIf(true())) ~> alterRow1",
-						"SELECTWithIsActive sink(allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     input(",
-						"          EMPLOYEEKEY as integer,",
-						"          EmpID as integer,",
-						"          EMPLOYEENAME as string,",
-						"          EMPLOYEEGENDER as string,",
-						"          EMPLOYEEDEPT as string,",
-						"          EMPLOYEECITY as string,",
-						"          IsActive as boolean",
-						"     ),",
-						"     deletable:false,",
-						"     insertable:true,",
-						"     updateable:false,",
-						"     upsertable:false,",
-						"     format: 'table',",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true,",
-						"     saveOrder: 2,",
-						"     errorHandlingOption: 'stopOnFirstError',",
-						"     mapColumn(",
-						"          EmpID,",
-						"          EMPLOYEENAME,",
-						"          EMPLOYEEGENDER,",
-						"          EMPLOYEEDEPT,",
-						"          EMPLOYEECITY,",
-						"          IsActive",
-						"     )) ~> TargetDimension",
-						"alterRow1 sink(allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     input(",
-						"          EMPLOYEEKEY as integer,",
-						"          EmpID as integer,",
-						"          EMPLOYEENAME as string,",
-						"          EMPLOYEEGENDER as string,",
-						"          EMPLOYEEDEPT as string,",
-						"          EMPLOYEECITY as string,",
-						"          IsActive as boolean",
-						"     ),",
-						"     deletable:false,",
-						"     insertable:false,",
-						"     updateable:true,",
-						"     upsertable:false,",
-						"     keys:['EMPLOYEEKEY'],",
-						"     format: 'table',",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true,",
-						"     saveOrder: 1,",
-						"     errorHandlingOption: 'stopOnFirstError',",
-						"     mapColumn(",
-						"          EMPLOYEEKEY = Existing_EMPLOYEEKEY,",
-						"          EmpID = Existing_EmpID,",
-						"          EMPLOYEENAME = Existing_EMPLOYEENAME,",
-						"          EMPLOYEEGENDER = Existing_EMPLOYEEGENDER,",
-						"          EMPLOYEEDEPT = Existing_EMPLOYEEDEPT,",
-						"          EMPLOYEECITY = Existing_EMPLOYEECITY,",
-						"          IsActive = Existing_IsActive",
-						"     )) ~> sink1"
-					]
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/powerquery1')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "WranglingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"name": "EmployeeDimension",
-							"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> EmployeeDimension",
-							"dataset": {
-								"referenceName": "EmployeeDimension",
-								"type": "DatasetReference"
-							}
-						}
-					],
-					"script": "section Section1;\r\nshared EmployeeDimension = let AdfDoc = Sql.Database(\"ravidatacloud.database.windows.net\", \"ravidatacloud\", [CreateNavigationProperties = false]), InputTable = AdfDoc{[Schema=\"dbo\",Item=\"DIMEmployee\"]}[Data] in InputTable;\r\nshared UserQuery = let Source = #\"EmployeeDimension\",\r\n  #\"Filtered rows\" = Table.SelectRows(Source, each [IsActive] = true) in #\"Filtered rows\";\r\n",
-					"documentLocale": "en-us"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DataFlowDimension')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "DataFlowDimension",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "1.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "DimensionDataFlow",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"SourceTable": {},
-									"sink1": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"annotations": [],
-				"lastPublishTime": "2022-04-25T20:27:58Z"
-			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/DimensionDataFlow')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/pipeline1')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Power Query1",
-						"type": "ExecuteWranglingDataflow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "1.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "EmPloyeeDimension",
-								"type": "DataFlowReference",
-								"datasetParameters": {
-									"EmployeeDimension": {},
-									"UserQuerySinkDataset": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"queries": [
-								{
-									"queryName": "UserQuery",
-									"dataflowSinks": [
-										{
-											"name": "UserQuerySinkDataset",
-											"dataset": {
-												"referenceName": "SinkDataset",
-												"type": "DatasetReference",
-												"parameters": {}
-											},
-											"script": "sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> UserQuerySinkDataset"
-										}
-									]
-								}
-							]
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/EmPloyeeDimension')]"
+				"[concat(variables('factoryId'), '/datasets/SourceOfDimension')]"
 			]
 		}
 	]
