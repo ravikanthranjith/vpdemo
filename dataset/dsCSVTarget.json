@@ -1,0 +1,21 @@
+{
+	"name": "dsCSVTarget",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "adlsTargetAug",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileSystem": "demoaug"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
