@@ -35,11 +35,19 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'adlsTarget'"
 		},
+		"adlsTargetAug_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'adlsTargetAug'"
+		},
 		"KVLinkedService_properties_typeProperties_baseUrl": {
 			"type": "string",
 			"defaultValue": "https://KVDemo-VP.vault.azure.net/"
 		},
 		"adlsTarget_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://visualpathdemo.dfs.core.windows.net/"
+		},
+		"adlsTargetAug_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://visualpathdemo.dfs.core.windows.net/"
 		},
@@ -88,11 +96,17 @@
 					"adlsTarget_accountKey": {
 						"value": "[parameters('adlsTarget_accountKey')]"
 					},
+					"adlsTargetAug_accountKey": {
+						"value": "[parameters('adlsTargetAug_accountKey')]"
+					},
 					"KVLinkedService_properties_typeProperties_baseUrl": {
 						"value": "[parameters('KVLinkedService_properties_typeProperties_baseUrl')]"
 					},
 					"adlsTarget_properties_typeProperties_url": {
 						"value": "[parameters('adlsTarget_properties_typeProperties_url')]"
+					},
+					"adlsTargetAug_properties_typeProperties_url": {
+						"value": "[parameters('adlsTargetAug_properties_typeProperties_url')]"
 					}
 				}
 			},

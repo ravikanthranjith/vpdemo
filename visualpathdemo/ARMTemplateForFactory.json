@@ -35,11 +35,19 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'adlsTarget'"
 		},
+		"adlsTargetAug_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'adlsTargetAug'"
+		},
 		"KVLinkedService_properties_typeProperties_baseUrl": {
 			"type": "string",
 			"defaultValue": "https://KVDemo-VP.vault.azure.net/"
 		},
 		"adlsTarget_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://visualpathdemo.dfs.core.windows.net/"
+		},
+		"adlsTargetAug_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://visualpathdemo.dfs.core.windows.net/"
 		}
@@ -440,6 +448,78 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/dataflows/EmPloyeeDimension')]",
 				"[concat(variables('factoryId'), '/datasets/SinkDataset')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pipeline2')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy data1",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "dsASQL",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "dtTarget",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/dsASQL')]",
+				"[concat(variables('factoryId'), '/datasets/dtTarget')]"
 			]
 		},
 		{
@@ -1839,6 +1919,68 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/dsASQL')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ASQL",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "AppID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "AppName",
+						"type": "varchar"
+					},
+					{
+						"name": "AppShortName",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "APPLICATIONS"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/dtTarget')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "adlsTarget",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "visualpathdirectory/2022/02",
+						"fileSystem": "visualpath"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/adlsTarget')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/AzureBlobStorage1')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -1926,6 +2068,36 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/KVLinkedService')]"
 			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_ASQL')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('LS_ASQL_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/adlsTarget')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('adlsTarget_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('adlsTarget_accountKey')]"
+					}
+				}
+			},
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/DailyNightly')]",
@@ -2907,55 +3079,51 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/LS_ASQL')]",
+			"name": "[concat(parameters('factoryName'), '/adlsTargetAug')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
 			"properties": {
+				"description": "test",
 				"annotations": [],
-				"type": "AzureSqlDatabase",
+				"type": "AzureBlobFS",
 				"typeProperties": {
-					"connectionString": "[parameters('LS_ASQL_connectionString')]"
+					"url": "[parameters('adlsTargetAug_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('adlsTargetAug_accountKey')]"
+					}
 				}
 			},
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/dsASQL')]",
+			"name": "[concat(parameters('factoryName'), '/dsCSVTarget')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"linkedServiceName": {
-					"referenceName": "LS_ASQL",
+					"referenceName": "adlsTargetAug",
 					"type": "LinkedServiceReference"
 				},
 				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [
-					{
-						"name": "AppID",
-						"type": "int",
-						"precision": 10
-					},
-					{
-						"name": "AppName",
-						"type": "varchar"
-					},
-					{
-						"name": "AppShortName",
-						"type": "varchar"
-					}
-				],
+				"type": "DelimitedText",
 				"typeProperties": {
-					"schema": "dbo",
-					"table": "APPLICATIONS"
-				}
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileSystem": "demoaug"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ASQL')]"
+				"[concat(variables('factoryId'), '/linkedServices/adlsTargetAug')]"
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/pipeline2')]",
+			"name": "[concat(parameters('factoryName'), '/pl_CopyfromSQL')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -3008,7 +3176,7 @@
 						],
 						"outputs": [
 							{
-								"referenceName": "dtTarget",
+								"referenceName": "dsCSVTarget",
 								"type": "DatasetReference",
 								"parameters": {}
 							}
@@ -3023,51 +3191,7 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/dsASQL')]",
-				"[concat(variables('factoryId'), '/datasets/dtTarget')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/adlsTarget')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureBlobFS",
-				"typeProperties": {
-					"url": "[parameters('adlsTarget_properties_typeProperties_url')]",
-					"accountKey": {
-						"type": "SecureString",
-						"value": "[parameters('adlsTarget_accountKey')]"
-					}
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/dtTarget')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "adlsTarget",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"folderPath": "visualpathdirectory/2022/02",
-						"fileSystem": "visualpath"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"quoteChar": "\""
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/adlsTarget')]"
+				"[concat(variables('factoryId'), '/datasets/dsCSVTarget')]"
 			]
 		}
 	]

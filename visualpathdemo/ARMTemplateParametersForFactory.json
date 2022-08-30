@@ -26,10 +26,16 @@
 		"adlsTarget_accountKey": {
 			"value": ""
 		},
+		"adlsTargetAug_accountKey": {
+			"value": ""
+		},
 		"KVLinkedService_properties_typeProperties_baseUrl": {
 			"value": "https://KVDemo-VP.vault.azure.net/"
 		},
 		"adlsTarget_properties_typeProperties_url": {
+			"value": "https://visualpathdemo.dfs.core.windows.net/"
+		},
+		"adlsTargetAug_properties_typeProperties_url": {
 			"value": "https://visualpathdemo.dfs.core.windows.net/"
 		}
 	}
